@@ -2,31 +2,29 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 
+import "core"
+import "modules/clock"
+
+// qmllint disable uncreatable-type
 PanelWindow {
     anchors {
         top: true
         left: true
         right: true
     }
-    implicitHeight: 32
+    implicitHeight: 400
     exclusiveZone: 0          // не двигаем окна
     color: "transparent"
 
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "dimshell"
 
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 3
-        width: 120
-        height: 24
-        radius: 8
-        color: "#111"
+    mask: Region{item: island}
 
-        Text {
-            anchors.centerIn: parent
-            color: "white"
-            text: Qt.formatTime(new Date(), "hh:mm")
-        }
+    Island {
+        id: island
+        onTapped: console.info("clicked")
+
+        ClockCompact {}
     }
 }
