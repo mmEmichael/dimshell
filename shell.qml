@@ -23,8 +23,8 @@ PanelWindow {
 
     Island {
         id: island
-        onTapped: console.info("clicked")
-
-        ClockCompact {}
+        onTapped: expanded = !expanded
+        compactContent: ClockCompact {}
+        expandedContent: Text { text: "expanded"; color: Theme.textPrimary }
     }
 }

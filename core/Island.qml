@@ -1,29 +1,58 @@
 import QtQuick
 
+import "."
+
 Rectangle {
     id: root
 
-    // Всё, что вложено в Island { ... }, попадает в host
-    default property alias content: host.data
+    property bool expanded: false
+    property real expandedWidth: Theme.expandedWidth
+    property real expandedHeight: Theme.expandedHeight
+
+    // Два слота вместо одного default-alias
+    property alias compactContent: compactHost.data
+    property alias expandedContent: expandedHost.data
 
     signal tapped()
     readonly property bool hovered: hover.hovered
 
-    // Размер и форма берутся из токенов, ширина считается от содержимого
-    width: host.childrenRect.width + 2 * Theme.pillPadding
-    height: Theme.pillHeight
-    radius: Theme.pillPadding
+    width: expanded ? expandedWidth
+                    : compactHost.childrenRect.width + 2 * Theme.pillPadding
+    height: expanded ? expandedHeight : Theme.pillHeight
+    radius: Math.min(height / 2, Theme.expandedRadius)
     color: Theme.pillBg
+    clip: true
 
-    // Позиция: по центру сверху, отступ из темы
     y: Theme.pillTopMargin
     anchors.horizontalCenter: parent.horizontalCenter
 
+    Behavior on width  { SpringAnimation { spring: 4; damping: 0.3; epsilon: 0.25 } }
+    Behavior on height { SpringAnimation { spring: 4; damping: 0.3; epsilon: 0.25 } }
+
+    // Компактный вид
     Item {
-        id: host
+        id: compactHost
         anchors.centerIn: parent
         width: childrenRect.width
         height: childrenRect.height
+        opacity: root.expanded ? 0 : 1
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 120 } }
+    }
+
+    // Раскрытый вид
+    Item {
+        id: expandedHost
+        anchors.fill: parent
+        anchors.margins: Theme.pillPadding
+        opacity: root.expanded ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity {
+            SequentialAnimation {
+                PauseAnimation { duration: root.expanded ? 120 : 0 }
+                NumberAnimation { duration: 160 }
+            }
+        }
     }
 
     TapHandler {
